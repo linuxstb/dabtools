@@ -1,0 +1,4 @@
+SUBSYSTEM!="usb_device", ACTION!="add", GOTO="wavefinder_rules_end"
+# Psion WaveFinder
+SYSFS{idVendor}=="09cd", SYSFS{idProduct}=="2001", MODE="0666"
+LABEL="wavefinder_rules_end"

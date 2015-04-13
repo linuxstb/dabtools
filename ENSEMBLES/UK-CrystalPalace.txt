@@ -1,0 +1,9 @@
+
+UK, Crystal Palace
+
+12B: 225,648KHz - BBC National DAB
+11D: 222,064KHz - D1 National DAB
+
+12C: 227,360KHz - London 1
+12A: 223,936KHz - London 2
+11B: 218,640KHz - London 3

@@ -1,0 +1,7 @@
+Barcelona, Spain
+
+SOURCE: http://www.dabbarcelona.info/cas.html
+
+8A - 195,936KHz - MF2
+10A - 209,936KHz - MF1
+11B - 218,640KHz - FU-E

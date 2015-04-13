@@ -1,0 +1,1 @@
+rm -fr .tmp_versions modules.order Module.symvers wavefinder.ko wavefinder.o wavefinder.mod.[co] .wavefinder.ko.cmd .wavefinder.mod.o.cmd .wavefinder.o.cmd
