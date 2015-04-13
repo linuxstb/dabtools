@@ -1,6 +1,6 @@
-=dabtools
+# dabtools
 
-==Introduction
+## Introduction
 
 dabtools is work-in-progress set of tools for reception, recording and
 playback of DAB and DAB+ digital radio broadcasts. It currently
@@ -34,9 +34,9 @@ ensemble.  It is defined in ETSI 300 799.
 It consists of a set of fixed-size (6144 byte) frames, each containing
 24ms of audio and other data.
 
-==Hardware support
+## Hardware support
 
-===Psion Wavefinder
+### Psion Wavefinder
 
 The Psion Wavefinder is a USB DAB receiver sold between 2000 and 2002.
 The COFDM demodulation is performed on two DSPs and the samples are
@@ -69,7 +69,7 @@ to record a stream or
 to play sub-channel 2 from the ensemble.
 
 
-===RTL-SDR devices
+### RTL-SDR devices
 
 I have tested sdr2eti with RTL-SDR dongles with both FC00013 and R820T
 tuners with similar success.  Achieving a lock on a signal requires
@@ -80,7 +80,7 @@ e.g. to record an ensemble broadcasting at 218.640MHz with 9dB gain:
 ./sdr2eti 218640000 90 > dump.eti
 
 
-==Building
+## Building
 
 dabtools requires librtlsdr and libfftw3.  The former can be found at
 http://sdr.osmocom.org/trac/wiki/rtl-sdr and the latter should be
@@ -88,7 +88,7 @@ available via your distribution's package manage (e.g. libfftw3-dev).
 
 
 
-==Copyright
+## Copyright
 
 dabtools is written by Dave Chapman <dave@dchapman.com> 
 
