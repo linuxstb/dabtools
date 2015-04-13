@@ -72,7 +72,7 @@ to play sub-channel 2 from the ensemble.
 
 ### RTL-SDR devices
 
-I have tested sdr2eti with RTL-SDR dongles with both FC00013 and R820T
+I have tested sdr2eti with RTL-SDR dongles with both FC00013 and R828D
 tuners with similar success.  Achieving a lock on a signal requires
 manually setting the gain value, which is passed in 10ths of a dB.
 
