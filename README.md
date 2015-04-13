@@ -88,6 +88,11 @@ http://sdr.osmocom.org/trac/wiki/rtl-sdr and the latter should be
 available via your distribution's package manage (e.g. libfftw3-dev).
 
 
+## Other ETI tools
+
+OpenDigitalRadio maintains a list of other open source ETI tools here:
+
+http://wiki.opendigitalradio.org/Ensemble_Transport_Interface
 
 ## Copyright
 
