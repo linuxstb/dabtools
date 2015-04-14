@@ -212,8 +212,11 @@ static uint8_t cif_time_deinterleaved[3072*18];
 static uint8_t dpbuf[3072*4*18];
 static uint8_t obuf[3072*18];
 
-void create_eti(uint8_t* fibs, uint8_t* cifs_msc[], struct ens_info_t *info)
+void create_eti(struct dab_state_t* dab)
 {
+  uint8_t *fibs = dab->cifs_fibs[0];
+  struct ens_info_t *info = &dab->ens_info;
+
 /* Constraint length */
 #define N 4
 /* Number of symbols per data bit */
@@ -234,7 +237,7 @@ void create_eti(uint8_t* fibs, uint8_t* cifs_msc[], struct ens_info_t *info)
   int e = e1 + 96;
 
   /* Time-deinterleave the oldest CIF in the buffer */
-  time_deinterleave(cif_time_deinterleaved, cifs_msc);
+  time_deinterleave(cif_time_deinterleaved, dab->cifs_msc);
 
   /* Now go through each subchannel, outputting the MSC data to our ETI frame */
   for (i=0;i<64;i++) {
@@ -290,7 +293,11 @@ void create_eti(uint8_t* fibs, uint8_t* cifs_msc[], struct ens_info_t *info)
   memset(eti+e, 0x55, 6144-e);
 
   //fprintf(stderr,"Writing %d bytes (*8=%d, bits=%d)\n",obytes,obytes*8,bits);
-  write(1,eti,6144);
+
+  /* Call the user's callback to do process the ETI */
+  if (dab->eti_callback) {
+    dab->eti_callback(eti);
+  }
   
   /* Increment CIF count */
    info->CIFCount_lo++;

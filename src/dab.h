@@ -62,4 +62,26 @@ struct ens_info_t {
   struct subchannel_info_t subchans[64];
 };
 
+struct dab_state_t
+{
+  void* device_state;
+  struct demapped_transmission_frame_t tfs[5]; /* We need buffers for 5 tranmission frames - the four previous, plus the new */
+  struct tf_info_t tf_info;
+  struct ens_info_t ens_info;
+
+  unsigned char* cifs_msc[16];  /* Each CIF consists of 3072*18 bits */
+  unsigned char* cifs_fibs[16];  /* Each CIF consists of 3072*18 bits */
+  int ncifs;  /* Number of CIFs in buffer - we need 16 to start outputting them */
+  int tfidx;  /* Next tf buffer to read to. */
+  int locked;
+  int ens_info_shown;
+  int okcount;
+
+  /* Callback function to process a decoded ETI frame */
+  void (* eti_callback)(uint8_t *eti);
+};
+
+void init_dab_state(struct dab_state_t **dab, void* device_state);
+void dab_process_frame(struct dab_state_t *dab);
+
 #endif

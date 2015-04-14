@@ -5,7 +5,7 @@ LDFLAGS=-lm -lfftw3 -lpthread -g
 CFLAGS+=$(shell pkg-config --cflags librtlsdr)
 LDFLAGS+=$(shell pkg-config --libs librtlsdr)
 
-OBJS = wf_sync.o wf_prstables.o wf_maths.o fic.o misc.o viterbi.o dab_tables.o input_wf.o depuncture.o input_sdr.o sdr_fifo.o sdr_sync.o
+OBJS = wf_sync.o wf_prstables.o wf_maths.o fic.o misc.o viterbi.o dab_tables.o input_wf.o depuncture.o input_sdr.o sdr_fifo.o sdr_sync.o dab.o
 
 all: dab2eti sdr2eti eti2mpa
 
