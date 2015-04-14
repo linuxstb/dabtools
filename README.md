@@ -23,7 +23,7 @@ dabtools currently consists of the following tools:
 
 sdr2eti - receiver for RTL-SDR dongles
 
-dab2eti - receiver for the Psion Wavefinder
+wf2eti - receiver for the Psion Wavefinder
 
 (these two tools will be unified in the near future)
 
@@ -58,14 +58,14 @@ with OpenDAB, but with the low-level functionality from the OpenDAB
 application moved into the driver in order to provide a higher-level
 API.
 
-dab2eti is used to receive an ETI stream, and the frequency is
+wf2eti is used to receive an ETI stream, and the frequency is
 specified in KHz.  e.g.
 
-./dab2eti 218640 > dump.eti
+./wf2eti 218640 > dump.eti
 
 to record a stream or
 
-./dab2eti 218640 | eti2mpa 2 | madplay -v -
+./wf2eti 218640 | eti2mpa 2 | madplay -v -
 
 to play sub-channel 2 from the ensemble.
 
