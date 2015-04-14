@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-O3 -W -Wall -g
-LDFLAGS=-lm -lfftw3 -g
+LDFLAGS=-lm -lfftw3 -lpthread -g
 
 CFLAGS+=$(shell pkg-config --cflags librtlsdr)
 LDFLAGS+=$(shell pkg-config --libs librtlsdr)
@@ -25,10 +25,10 @@ wf_maths.o: wf_maths.c
 	$(CC) $(CFLAGS) -c -o wf_maths.o wf_maths.c
 
 dab2eti: $(OBJS) dab2eti.o
-	$(CC) $(LDFLAGS) -o dab2eti dab2eti.o $(OBJS)
+	$(CC) -o dab2eti dab2eti.o $(OBJS) $(LDFLAGS)
 
 sdr2eti: $(OBJS) sdr2eti.o
-	$(CC) $(LDFLAGS) -o sdr2eti sdr2eti.o $(OBJS)
+	$(CC) -o sdr2eti sdr2eti.o $(OBJS) $(LDFLAGS)
 
 clean:
 	rm -f dab2eti dab2eti.o sdr2eti sdr2eti.o eti2mpa eti2mpa.o $(OBJS) *~
