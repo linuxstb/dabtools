@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+enum device_type_t {
+  DAB_DEVICE_WAVEFINDER,
+  DAB_DEVICE_RTLSDR,
+};
+
 /* A demapped transmission frame represents a transmission frame in
    the final state before the FIC-specific and MSC-specific decoding
    stages.
@@ -64,6 +69,7 @@ struct ens_info_t {
 
 struct dab_state_t
 {
+  enum device_type_t device_type;
   void* device_state;
   struct demapped_transmission_frame_t tfs[5]; /* We need buffers for 5 tranmission frames - the four previous, plus the new */
   struct tf_info_t tf_info;

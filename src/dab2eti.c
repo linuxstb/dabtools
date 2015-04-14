@@ -40,6 +40,7 @@ int main(int argc, char* argv[])
   freq_khz = atoi(argv[1]);
 
   init_dab_state(&dab,&wf);
+  dab->device_type = DAB_DEVICE_WAVEFINDER;
 
   dab->eti_callback=eti_callback;
 

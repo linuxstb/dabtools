@@ -147,6 +147,8 @@ int main (int argc, char **argv)
   struct dab_state_t* dab;
 
   init_dab_state(&dab,&sdr);
+  dab->device_type = DAB_DEVICE_RTLSDR;
+
   dab->eti_callback = eti_callback;
 
   memset(&sdr,0,sizeof(struct sdr_state_t));
