@@ -255,7 +255,7 @@ void create_eti(struct dab_state_t* dab)
 
       /* BDB's wfic functions: */
       bits = len/N - (K - 1);
-      k_viterbi(&metric, obuf, dpbuf, bits, mettab, 0, 0);
+      viterbi(&metric, obuf, dpbuf, bits, mettab, 0, 0);
       descramble(obuf, dpbuf, bits);
 
       bit_to_byte(dpbuf, bits, eti + e);

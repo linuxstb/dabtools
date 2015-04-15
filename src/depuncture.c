@@ -32,7 +32,46 @@
 /* Viterbi symbol values 0->127 1->129 erasure->128 */
 #define OFFSET 128
 
-int uep_depuncture(unsigned char *obuf, unsigned char *inbuf, struct subchannel_info_t *s, int* len)
+void fic_depuncture(uint8_t *obuf, uint8_t *inbuf)
+{
+    int i,j;
+
+    for (i=0; i<21*BLKSIZE; i+=32)
+    {
+        for (j=0; j<8; j++)
+        {
+            *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
+            *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
+            *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
+            *(obuf++) = OFFSET;           
+        }
+    }
+    for (i=21*BLKSIZE; i<24*BLKSIZE; i+=32)
+    {
+        for (j=0; j<7; j++)
+        {
+            *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
+            *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
+            *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
+            *(obuf++) = OFFSET;           
+        }
+        *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
+        *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
+        *(obuf++) = OFFSET;           
+        *(obuf++) = OFFSET;           
+    }
+    for (j=0; j<6; j++)
+    {
+        *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
+        *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
+        *(obuf++) = OFFSET;           
+        *(obuf++) = OFFSET;           
+    }
+
+   return;
+}
+
+void uep_depuncture(uint8_t *obuf, uint8_t *inbuf, struct subchannel_info_t *s, int* len)
 {
 	int i, j, k, indx;
 	const struct uepprof p = ueptable[s->uep_index];
@@ -53,10 +92,9 @@ int uep_depuncture(unsigned char *obuf, unsigned char *inbuf, struct subchannel_
 		else
 			*(obuf + k++) = OFFSET;
 	*len = k;
-	return 0;
 }
 
-int eep_depuncture(unsigned char *obuf, unsigned char *inbuf, struct subchannel_info_t *s, int* len)
+void eep_depuncture(uint8_t *obuf, uint8_t *inbuf, struct subchannel_info_t *s, int* len)
 {
 	int i, j, k, n, indx;
 	struct eepprof p = eeptable[s->protlev];
@@ -81,5 +119,4 @@ int eep_depuncture(unsigned char *obuf, unsigned char *inbuf, struct subchannel_
 		else
 			*(obuf + k++) = OFFSET;
 	*len = k;
-	return 0;
 }

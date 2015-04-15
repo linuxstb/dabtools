@@ -1,9 +1,11 @@
 #ifndef _DEPUNCTURE_H
 #define _DEPUNCTURE_H
 
+#include <stdint.h>
 #include "dab.h"
 
-int uep_depuncture(unsigned char *obuf, unsigned char *inbuf, struct subchannel_info_t *s, int* len);
-int eep_depuncture(unsigned char *obuf, unsigned char *inbuf, struct subchannel_info_t *s, int* len);
+void fic_depuncture(uint8_t *obuf, uint8_t *inbuf);
+void uep_depuncture(uint8_t *obuf, uint8_t *inbuf, struct subchannel_info_t *s, int* len);
+void eep_depuncture(uint8_t *obuf, uint8_t *inbuf, struct subchannel_info_t *s, int* len);
 
 #endif

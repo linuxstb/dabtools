@@ -5,6 +5,7 @@
 
 #include "dab.h"
 #include "fic.h"
+#include "depuncture.h"
 #include "viterbi.h"
 #include "dab_tables.h"
 
@@ -176,50 +177,6 @@ void fib_decode(struct tf_info_t *info, struct tf_fibs_t *fibs, int nfibs)
   }
 }
 
-static void fic_depuncture(uint8_t *in, uint8_t *out)
-{
-    int i,j,offset;
-
-    offset = 0;
-    for (i=0; i<21*128; i+=32)
-    {
-        for (j=0; j<8; j++)
-        {
-            out[i+j*4+0] = in[offset+0];
-            out[i+j*4+1] = in[offset+1];
-            out[i+j*4+2] = in[offset+2];
-            out[i+j*4+3] = 8;           
-            offset+=3;
-        }
-    }
-    for (i=21*128; i<24*128; i+=32)
-    {
-        for (j=0; j<7; j++)
-        {
-            out[i+j*4+0] = in[offset+0];
-            out[i+j*4+1] = in[offset+1];
-            out[i+j*4+2] = in[offset+2];
-            out[i+j*4+3] = 8;
-            offset+=3;
-        }
-        out[i+j*4+0] = in[offset+0];
-        out[i+j*4+1] = in[offset+1];
-        out[i+j*4+2] = 8;
-        out[i+j*4+3] = 8;
-        offset+=2;
-    }
-    for (j=0; j<6; j++)
-    {
-        out[i+j*4+0] = in[offset+0];
-        out[i+j*4+1] = in[offset+1];
-        out[i+j*4+2] = 8;
-        out[i+j*4+3] = 8;
-        offset+=2;
-    }
-
-   return;
-}
-
 static void fic_descramble(uint8_t *in, uint8_t * out, int32_t len)
 {
   int32_t i;
@@ -251,6 +208,7 @@ void fic_decode(struct demapped_transmission_frame_t *tf)
   uint8_t tmp1[3096];
   uint8_t tmp2[768];
   int i,j;
+  unsigned int metric;
 
   tf->fibs.ok_count = 0;
 
@@ -270,10 +228,10 @@ void fic_decode(struct demapped_transmission_frame_t *tf)
      We treat them as 4 sets of 2304 bits */
   for (i=0;i<4;i++) {
     /* depuncture, 2304->3096 */
-    fic_depuncture(tf->fic_symbols_demapped[0]+(i*2304), tmp1);
+    fic_depuncture(tmp1, tf->fic_symbols_demapped[0]+(i*2304));
 
     /* viterbi, 3096->768 */
-    viterbi(tmp1, 3096, tmp2);
+    viterbi(&metric, tmp2, tmp1, 768, mettab, 0, 0);
   
     /* descramble, 768->768 */
     fic_descramble(tmp2, tmp1, 768);

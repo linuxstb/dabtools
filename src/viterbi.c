@@ -310,8 +310,7 @@ double erf(double x)
 
 
 //inline int
-int
-parity(int x)
+static int parity(int x)
 {
   x ^= (x >> 16);
   x ^= (x >> 8);
@@ -349,7 +348,7 @@ unsigned int endstate)
 
 /* Viterbi decoder */
 int
-k_viterbi(
+viterbi(
 unsigned int *metric,           /* Final path metric (returned value) */
 unsigned char *data,	/* Decoded output data */
 unsigned char *symbols,	/* Raw deinterleaved input symbols */
@@ -464,27 +463,4 @@ int init_viterbi()
 
     gen_met(mettab,amp,noise,0.,4);
     return 0;
-}
-
-int viterbi(unsigned char *ibuf, int ilen, unsigned char *obuf)
-{
-    int i;
-    unsigned int metric;
-    int bits;
-    int amp = 1;
-    unsigned char symbols[3096];
-
-     // ilen = 3096 = 3072 + 4*6
-    bits = (ilen / N) - (K-1);
-    // convert soft symbols
-    for (i=0; i<ilen; i++)
-    {
-        // 1->127, 0->129, erased->128,
-        symbols[i] = (ibuf[i]==1) ? OFFSET+amp : (ibuf[i]==0) ? OFFSET-amp : OFFSET;
-    }
-
-    k_viterbi(&metric, obuf, symbols, bits, mettab, 0, 0);
-
-    
-    return bits;
 }
