@@ -7,28 +7,13 @@ LDFLAGS+=$(shell pkg-config --libs librtlsdr)
 
 OBJS = wf_sync.o wf_prstables.o wf_maths.o fic.o misc.o viterbi.o dab_tables.o input_wf.o depuncture.o input_sdr.o sdr_fifo.o sdr_sync.o dab.o
 
-all: wf2eti sdr2eti eti2mpa
+all: dab2eti eti2mpa
+
+dab2eti: $(OBJS) dab2eti.o
+	$(CC) -o dab2eti dab2eti.o $(OBJS) $(LDFLAGS)
 
 eti2mpa: eti2mpa.o
 	$(CC) -o eti2mpa eti2mpa.o
 
-wf2eti.o: wf2eti.c dab.h
-	$(CC) $(CFLAGS) -c -o wf2eti.o wf2eti.c
-
-wf_sync.o: wf_sync.c
-	$(CC) $(CFLAGS) -c -o wf_sync.o wf_sync.c
-
-wf_prstables.o: wf_prstables.c
-	$(CC) $(CFLAGS) -c -o wf_prstables.o wf_prstables.c
-
-wf_maths.o: wf_maths.c
-	$(CC) $(CFLAGS) -c -o wf_maths.o wf_maths.c
-
-wf2eti: $(OBJS) wf2eti.o
-	$(CC) -o wf2eti wf2eti.o $(OBJS) $(LDFLAGS)
-
-sdr2eti: $(OBJS) sdr2eti.o
-	$(CC) -o sdr2eti sdr2eti.o $(OBJS) $(LDFLAGS)
-
 clean:
-	rm -f wf2eti wf2eti.o sdr2eti sdr2eti.o eti2mpa eti2mpa.o $(OBJS) *~
+	rm -f dab2eti dab2eti.o eti2mpa eti2mpa.o $(OBJS) *~

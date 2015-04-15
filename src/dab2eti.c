@@ -29,12 +29,13 @@ david.may.muc@googlemail.com
 #include <rtl-sdr.h>
 #include <unistd.h>
 #include "dab.h"
-#include "fic.h"
-#include "misc.h"
-#include "viterbi.h"
 #include "input_sdr.h"
+#include "input_wf.h"
 
-/* RTL Device */
+/* Wavefinder state */
+static struct wavefinder_t  wf;
+
+/* RTL-SDR device state */
 static struct sdr_state_t sdr;
 static rtlsdr_dev_t *dev = NULL;
 
@@ -133,7 +134,7 @@ static void eti_callback(uint8_t* eti)
   write(1, eti, 6144);
 }
 
-int main (int argc, char **argv)
+static int do_sdr_decode(struct dab_state_t* dab, int frequency, int gain)
 {
   struct sigaction sigact;
   uint32_t dev_index = 0;
@@ -142,23 +143,10 @@ int main (int argc, char **argv)
   char vendor[256], product[256], serial[256];
   uint32_t samp_rate = 2048000;
 
-  int gain = AUTO_GAIN;
-
-  struct dab_state_t* dab;
-
-  init_dab_state(&dab,&sdr);
-  dab->device_type = DAB_DEVICE_RTLSDR;
-
-  dab->eti_callback = eti_callback;
-
   memset(&sdr,0,sizeof(struct sdr_state_t));
 
-  if (argc > 1) {
-    sdr.frequency = atoi(argv[1]);
-  } else {
-    sdr.frequency = 220352000;
-  }
-  if (argc > 2) { gain = atoi(argv[2]); } else { gain = AUTO_GAIN; }
+  sdr.frequency = frequency;
+
   //fprintf(stderr,"%i\n",sdr.frequency);
 
   /*---------------------------------------------------
@@ -258,4 +246,57 @@ int main (int argc, char **argv)
   //dab_demod_close(&dab);
   rtlsdr_close(dev);
   return 1;
+}
+
+static int do_wf_decode(struct dab_state_t* dab, int frequency)
+{
+  struct wavefinder_t *wf = dab->device_state;
+  int displayed_lock = 0;
+
+  wf_init(wf);
+  wf_tune(wf, (frequency+500)/1000);  /* Round frequency to the nearest KHz */
+
+  fprintf(stderr,"Waiting for sync...");
+
+  /* Read (and discard) the first frame - we know it is missing the FIC symbols */
+  wf_read_frame(wf,&dab->tfs[0]);
+  if ((wf->sync_locked) && (!displayed_lock)) {
+    fprintf(stderr,"LOCKED\n");
+    displayed_lock = 1;
+  }
+
+  while (1) {
+    wf_read_frame(wf,&dab->tfs[dab->tfidx]);
+    dab_process_frame(dab);
+  }
+}
+
+void usage(void)
+{
+  fprintf(stderr,"Usage: dab2eti frequency [gain]\n");
+}
+
+int main(int argc, char* argv[])
+{
+  int frequency;
+  int gain = AUTO_GAIN;
+  struct dab_state_t* dab;
+
+  if ((argc < 2) || (argc > 3)) {
+    usage();
+    return 1;
+  }
+
+  frequency = atoi(argv[1]);
+  if (argc > 2) { gain = atoi(argv[2]); }
+
+  if (wf_open(&wf,"/dev/wavefinder0") >= 0) {
+    init_dab_state(&dab,&wf,eti_callback);
+    dab->device_type = DAB_DEVICE_WAVEFINDER;
+    do_wf_decode(dab,frequency);
+  } else {
+    init_dab_state(&dab,&sdr,eti_callback);
+    dab->device_type = DAB_DEVICE_RTLSDR;
+    do_sdr_decode(dab,frequency,gain);
+  }
 }

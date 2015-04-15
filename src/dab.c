@@ -3,16 +3,18 @@
 #include <string.h>
 
 #include "dab.h"
+#include "viterbi.h"
 #include "fic.h"
 #include "misc.h"
 
-void init_dab_state(struct dab_state_t **dab, void* device_state)
+void init_dab_state(struct dab_state_t **dab, void* device_state, void (* eti_callback)(uint8_t *eti))
 {
   int i;
 
   *dab = calloc(sizeof(struct dab_state_t),1);
 
   (*dab)->device_state = device_state;
+  (*dab)->eti_callback = eti_callback;
 
   for (i=0;i<64;i++) { (*dab)->ens_info.subchans[i].id = -1; (*dab)->ens_info.subchans[i].ASCTy = -1; }
   (*dab)->ens_info.CIFCount_hi = 0xff;

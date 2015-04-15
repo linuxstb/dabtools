@@ -21,11 +21,7 @@ code.
 
 dabtools currently consists of the following tools:
 
-sdr2eti - receiver for RTL-SDR dongles
-
-wf2eti - receiver for the Psion Wavefinder
-
-(these two tools will be unified in the near future)
+dab2eti - receive a DAB ensemble and output an ETI stream to STDOUT
 
 eti2mpa - extract an MPEG audio stream from an ETI stream.
 
@@ -36,6 +32,23 @@ It consists of a set of fixed-size (6144 byte) frames, each containing
 24ms of audio and other data.
 
 ## Hardware support
+
+Note that there is currently no way to specify the device - dab2eti
+will first look for and use a /dev/wavefinder0 device, and if that is
+not found, it will search for RTL-SDR devices.
+
+dab2eti on a Wavefinder requires around 51% CPU (on an Intel(R)
+Core(TM)2 Duo CPU E6750 @ 2.66GHz) to decode the BBC National DAB
+ensemble.
+
+dab2eti on an RTL-SDR dongle requires around 68% CPU on the same CPU
+and ensemble.
+
+Note however that in every 5th transmission frame the Wavefinder skips
+the FIC symbols and doesn't provide them to the host computer.  This
+means that an ETI file created from a Wavefinder will be missing the
+FIBs in 4 frames out of every 20 (dab2eti writes FIBs with 100%
+padding in their place).
 
 ### Psion Wavefinder
 
@@ -58,27 +71,27 @@ with OpenDAB, but with the low-level functionality from the OpenDAB
 application moved into the driver in order to provide a higher-level
 API.
 
-wf2eti is used to receive an ETI stream, and the frequency is
-specified in KHz.  e.g.
+dab2eti is used to receive an ETI stream, and the frequency is
+specified in Hz.  e.g.
 
-./wf2eti 218640 > dump.eti
+./dab2eti 218640000 > dump.eti
 
 to record a stream or
 
-./wf2eti 218640 | eti2mpa 2 | madplay -v -
+./dab2eti 218640000 | eti2mpa 2 | madplay -v -
 
 to play sub-channel 2 from the ensemble.
 
 
 ### RTL-SDR devices
 
-I have tested sdr2eti with RTL-SDR dongles with both FC00013 and R828D
+I have tested dab2eti with RTL-SDR dongles with both FC00013 and R828D
 tuners with similar success.  Achieving a lock on a signal requires
 manually setting the gain value, which is passed in 10ths of a dB.
 
 e.g. to record an ensemble broadcasting at 218.640MHz with 9dB gain:
 
-./sdr2eti 218640000 90 > dump.eti
+./dab2eti 218640000 90 > dump.eti
 
 
 ## Building
