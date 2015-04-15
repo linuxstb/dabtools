@@ -34,32 +34,22 @@ void time_deinterleave(uint8_t* dst, uint8_t* cifs[])
   return;
 }
 
-static void descramble(uint8_t *in, uint8_t * out, int32_t len)
+void dab_descramble_bytes(uint8_t *buf, int32_t nbytes)
 {
-  int32_t i;
+  int i,j;
+  uint8_t q;
   uint16_t p = 0x01FF;
   int32_t pp;
-  for (i=0; i<len; i++)
-    {
+  for (i=0; i<nbytes; i++) {
+    q = 0;
+    for (j=0;j<8;j++) {
       p = p << 1;
       pp = ((p>>9)&1) ^ ((p>>5)&1);
       p |= pp;
-      out[i] = in[i] ^ pp;
+      q = (q << 1) | pp;
     }
-  return;
-} 
-
-static void bit_to_byte(unsigned char *ibuf, int ilen, unsigned char *obuf)
-{
-  int i,j;
-
-  j = 0;
-  for (i=0; i<ilen; i+=8) {
-    obuf[j] = (ibuf[i+0]<<7) + (ibuf[i+1]<<6) + (ibuf[i+2]<<5) + (ibuf[i+3]<<4) +       //be
-      (ibuf[i+4]<<3) + (ibuf[i+5]<<2) + (ibuf[i+6]<<1) + (ibuf[i+7]<<0);
-    j++;
+    buf[i] ^= q;
   }
-
   return;
 }
 
@@ -148,6 +138,14 @@ static uint16_t calc_crc(unsigned char *data, int length, uint16_t const *crctab
   return crc & 0xffff;
 } 
 
+int check_fib_crc(uint8_t* data)
+{
+#define CRC_GOOD    0x1d0f
+  uint16_t crc = calc_crc(data,32,crctab_1021,0xffff);
+  return (crc == CRC_GOOD);
+}
+
+
 int init_eti(uint8_t* eti,struct ens_info_t *info)
 {
   int i = 0;
@@ -210,7 +208,6 @@ int init_eti(uint8_t* eti,struct ens_info_t *info)
 
 static uint8_t cif_time_deinterleaved[3072*18];
 static uint8_t dpbuf[3072*4*18];
-static uint8_t obuf[3072*18];
 
 void create_eti(struct dab_state_t* dab)
 {
@@ -253,13 +250,13 @@ void create_eti(struct dab_state_t* dab)
 
       //fprintf(stderr,"Depunctured - len=%d, sc->size=%d\n",len,sc->size);
 
-      /* BDB's wfic functions: */
       bits = len/N - (K - 1);
-      viterbi(&metric, obuf, dpbuf, bits, mettab, 0, 0);
-      descramble(obuf, dpbuf, bits);
-
-      bit_to_byte(dpbuf, bits, eti + e);
       obytes = ((bits / 8) + 7) & 0xfff8; /* Round up to multiple of 64 bits (8 bytes) */
+
+      viterbi(&metric, eti + e, dpbuf, bits, mettab, 0, 0);
+
+      dab_descramble_bytes(eti + e, obytes);
+
 #if 0
       /* TODO: Possibly check CRC.  This is not straightforward, as it
 	 is only calculated over part of the frame, and you need to

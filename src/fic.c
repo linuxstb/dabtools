@@ -7,43 +7,8 @@
 #include "fic.h"
 #include "depuncture.h"
 #include "viterbi.h"
+#include "misc.h"
 #include "dab_tables.h"
-
-#define CRC_POLY    0x8408
-#define CRC_GOOD    0xf0b8
-
-int crc16(unsigned char *buf, int len, int width)
-{
-  unsigned short crc;
-  int c15;
-  int i,j;
-
-  crc = 0xffff;
-  for (i=0; i<len; i++) {
-    for (j=0; j<width; j++) {
-      c15 = (crc & 1) ^ ((buf[i]>>(width-1-j))&1);
-      crc = crc >> 1;
-      if (c15) crc ^= CRC_POLY;
-     }
-  }
-  //fprintf(stderr,"crc=0x%04x\n",crc);
-
-  return (crc == CRC_GOOD);
-}
-
-static void bit_to_byte(unsigned char *ibuf, int ilen, unsigned char *obuf)
-{
-  int i,j;
-
-  j = 0;
-  for (i=0; i<ilen; i+=8) {
-    obuf[j] = (ibuf[i+0]<<7) + (ibuf[i+1]<<6) + (ibuf[i+2]<<5) + (ibuf[i+3]<<4) +       //be
-      (ibuf[i+4]<<3) + (ibuf[i+5]<<2) + (ibuf[i+6]<<1) + (ibuf[i+7]<<0);
-    j++;
-  }
-
-  return;
-}
 
 static int dump_buffer(char *name, char *buf, int blen)
 {
@@ -177,21 +142,6 @@ void fib_decode(struct tf_info_t *info, struct tf_fibs_t *fibs, int nfibs)
   }
 }
 
-static void fic_descramble(uint8_t *in, uint8_t * out, int32_t len)
-{
-  int32_t i;
-  uint16_t p = 0x01FF;
-  int32_t pp;
-  for (i=0; i<len; i++)
-    {
-      p = p << 1;
-      pp = ((p>>9)&1) ^ ((p>>5)&1);
-      p |= pp;
-      out[i] = in[i] ^ pp;
-    }
-  return;
-} 
-
 /* A NULL FIB with valid CRC */
 static uint8_t null_fib[32] = {
   0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -205,8 +155,7 @@ static uint8_t null_fib[32] = {
 
 void fic_decode(struct demapped_transmission_frame_t *tf)
 {
-  uint8_t tmp1[3096];
-  uint8_t tmp2[768];
+  uint8_t tmp[3096];
   int i,j;
   unsigned int metric;
 
@@ -228,20 +177,19 @@ void fic_decode(struct demapped_transmission_frame_t *tf)
      We treat them as 4 sets of 2304 bits */
   for (i=0;i<4;i++) {
     /* depuncture, 2304->3096 */
-    fic_depuncture(tmp1, tf->fic_symbols_demapped[0]+(i*2304));
+    fic_depuncture(tmp, tf->fic_symbols_demapped[0]+(i*2304));
 
-    /* viterbi, 3096->768 */
-    viterbi(&metric, tmp2, tmp1, 768, mettab, 0, 0);
+    /* viterbi, 3096 -> 768.  Output is converted to bytes */
+    viterbi(&metric, tf->fibs.FIB[fib], tmp, 768, mettab, 0, 0);
   
-    /* descramble, 768->768 */
-    fic_descramble(tmp2, tmp1, 768);
+    /* descramble (in-place), 768->768 */
+    dab_descramble_bytes(tf->fibs.FIB[fib], 96);
 
     // 768 bits = 3 FIBs - check CRC and convert to bytes
     for (j=0;j<3;j++) {
-      tf->fibs.FIB_CRC_OK[fib] = crc16(tmp1+j*256, 256, 1);
+      tf->fibs.FIB_CRC_OK[fib] = check_fib_crc(tf->fibs.FIB[fib]);
 
       if (tf->fibs.FIB_CRC_OK[fib]) {
-        bit_to_byte(tmp1+j*256, 256, tf->fibs.FIB[fib]);
         tf->fibs.ok_count++;
         //fprintf(stderr,"CRC OK in fib %d\n",fib);
       } else {

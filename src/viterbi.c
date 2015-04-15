@@ -437,16 +437,13 @@ unsigned int endstate            /* Encoder ending state */
   /* Chain back from terminal state to produce decoded data */
   if(data == NULL)
     return 0;/* Discard output */
-//  memset(data,0,(nbits+7)/8); /* round up in case nbits % 8 != 0 */
-  memset(data,0,nbits); /* round up in case nbits % 8 != 0 */
+  memset(data,0,(nbits+7)/8); /* round up in case nbits % 8 != 0 */
 
   for(i=nbits-1;i >= 0;i--){
     pp -= D;
     if(pp[endstate >> LOGLONGBITS] & (1L << (endstate & (LONGBITS-1)))){
       endstate |= (1 << (K-1));
-// output bitsstream rather than bytestream
-//            data[i>>3] |= 0x80 >> (i&7);
-            data[i] = 1;
+      data[i>>3] |= 0x80 >> (i&7);
     }
     endstate >>= 1;
   }
