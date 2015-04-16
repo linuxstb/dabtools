@@ -185,7 +185,7 @@ void fic_decode(struct demapped_transmission_frame_t *tf)
     /* descramble (in-place), 768->768 */
     dab_descramble_bytes(tf->fibs.FIB[fib], 96);
 
-    // 768 bits = 3 FIBs - check CRC and convert to bytes
+    /* Now check the CRCs of the three FIBs. */
     for (j=0;j<3;j++) {
       tf->fibs.FIB_CRC_OK[fib] = check_fib_crc(tf->fibs.FIB[fib]);
 
