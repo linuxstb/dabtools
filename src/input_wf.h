@@ -8,9 +8,7 @@ struct wavefinder_t {
   int fd;
   int sync_locked;
   unsigned char *symstr;
-  uint8_t fic_buffer[3*384];
   int fic_read[3];
-  uint8_t msc_buffer[72*384];
   int msc_read[72];
 };
 

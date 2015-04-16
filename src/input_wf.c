@@ -70,7 +70,6 @@ void wf_tune(struct wavefinder_t* wf, int freq_khz)
 
 int wf_read_frame(struct wavefinder_t* wf, struct demapped_transmission_frame_t *tf)
 {
-  int i;
   size_t n;
   uint8_t buf[524];
   
@@ -100,35 +99,22 @@ int wf_read_frame(struct wavefinder_t* wf, struct demapped_transmission_frame_t 
       if (symbol == 0) {
         /* NULL Symbol - process all that we have read so far */
 
-	/* First process the FIC symbols ,if any */
+	/* Did we get the FIC symbols? */
 	if ((wf->fic_read[0]) && (wf->fic_read[1]) && (wf->fic_read[2])) {
           tf->has_fic = 1;
-	  for (i=0;i<3;i++) {
-	    //dump_buffer("data2", fic_buffer+(i*384), 384);
-            wf_demap_symbol(tf->fic_symbols_demapped[i], wf->fic_buffer+(i*384));
-	  }
 	} else {
 	  tf->has_fic = 0;
-	  /* ?? What do we write to the ETI stream in this case? */
-	  /* At the very least we need to calculate CIFCount based on the previous FIC */
 	}
 
-	for (i=0;i<72;i++) {
-	  if (wf->msc_read[i]) {
-	    tf->msc_filter[i] = 1;
-	    wf_demap_symbol(tf->msc_symbols_demapped[i], wf->msc_buffer+(i*384));
-	  } else {
-	    tf->msc_filter[i] = 0;
-	  }
-	}
-
+        /* We have a complete frame in *tf, return it */
         return 0;
-      } else if (symbol <= 4) { /* Symbols 2, 3 and 4 are FIC symbols*/
-	memcpy(wf->fic_buffer + (symbol-2)*384, buf+12, 384);
+      } else if (symbol <= 4) { /* Symbols 2, 3 and 4 are FIC symbols */
+        wf_demap_symbol(tf->fic_symbols_demapped[symbol-2], buf+12);
 	wf->fic_read[symbol-2] = 1;
       } else if (symbol <= 76) { /* Symbols 5 to 76 are MSC symbols */
-	memcpy(wf->msc_buffer + (symbol-5)*384, buf+12, 384);
+        tf->msc_filter[symbol-5] = 1;
 	wf->msc_read[symbol-5] = 1;
+	wf_demap_symbol(tf->msc_symbols_demapped[symbol-5], buf+12);
       }
     }
   }
