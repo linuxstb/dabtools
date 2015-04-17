@@ -57,6 +57,10 @@ The COFDM demodulation is performed on two DSPs and the samples are
 then transferred over USB for further software processing on the host
 computer.
 
+The Wavefinder has a built-in antenna, which performs very well in my
+testing - much better than any of the small telescopic aerials
+commonly provided with the RTL-SDR dongles.
+
 To use dabtools with the Wavefinder, you need to build and install the
 driver in the wavefinder-driver directory.  The DSP firmware is
 included in the wavefinder.fw file in that directory and must be
@@ -85,13 +89,21 @@ to play sub-channel 2 from the ensemble.
 
 ### RTL-SDR devices
 
-I have tested dab2eti with RTL-SDR dongles with both FC00013 and R828D
-tuners with similar success.  Achieving a lock on a signal requires
-manually setting the gain value, which is passed in 10ths of a dB.
+dab2eti should work with any device supported by librtlsdr, but it
+seems that the E4000 tuner is the only one (amongst those I have
+tested) which is able to lock onto a DAB ensemble using auto-gain.
+For my other devices (one with an FC00013, and one with an R828D), I
+need to very carefully set the gain manually.
+
+To set the gain, you use the optional second parameter to dab2eti,
+which is the gain specified in tenths of a decibel.
 
 e.g. to record an ensemble broadcasting at 218.640MHz with 9dB gain:
 
 ./dab2eti 218640000 90 > dump.eti
+
+dab2eti will display the list of supported gain values - each tuner
+supports a different set of gain values.
 
 
 ## Building
