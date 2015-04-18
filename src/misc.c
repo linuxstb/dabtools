@@ -169,8 +169,9 @@ int init_eti(uint8_t* eti,struct ens_info_t *info)
   eti[i++] = info->CIFCount_lo; // FCT
   int FICF = 1;  // FIC present in MST
   int NST = 0;
-  int FL = NST + 1;
-  for (j=0;j<64;j++) { if (info->subchans[j].id >= 0) { NST++; FL += info->subchans[j].size / 2; } }
+  int FL = 0;
+  for (j=0;j<64;j++) { if (info->subchans[j].id >= 0) { NST++; FL += (info->subchans[j].bitrate * 3) / 4; } }
+  FL += NST + 1 + 24; // STC + EOH + MST (FIC data, Mode 1!)
   eti[i++] = (FICF << 7) | NST;
   int FP = ((info->CIFCount_hi * 250) + info->CIFCount_lo) % 8; // TODO (Guess!)
   int MID = 0x01; // We only support Mode 1
@@ -190,7 +191,7 @@ int init_eti(uint8_t* eti,struct ens_info_t *info)
       int STL = (info->subchans[j].bitrate * 3) / 8;
       eti[i++] = (SCID << 2) | ((SAD & 0x300) >> 8);
       eti[i++] = SAD & 0xff;
-      eti[i++] = (TPL << 2) | ((TPL & 0x300) >> 8);
+      eti[i++] = (TPL << 2) | ((STL & 0x300) >> 8);
       eti[i++] = STL & 0xff;
     }
   }
