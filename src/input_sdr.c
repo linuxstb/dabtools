@@ -50,7 +50,7 @@ int sdr_demod(struct demapped_transmission_frame_t *tf, struct sdr_state_t *sdr)
   /* give the AGC some time to settle */
   if (sdr->startup_delay<=GAIN_SETTLE_TIME) {
     sdr->startup_delay+=1;
-    printf("startup_delay=%i\n",sdr->startup_delay);
+    fprintf(stderr,"startup_delay=%i\n",sdr->startup_delay);
     return 0;
   }
   
