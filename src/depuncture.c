@@ -32,6 +32,16 @@
 /* Viterbi symbol values 0->127 1->129 erasure->128 */
 #define OFFSET 128
 
+/* 0 is a "strong 0" and 255 is a "strong 1" */
+static inline int to_viterbi(int x)
+{
+#ifdef ENABLE_SPIRAL_VITERBI
+  return ((x == 0) ? 0 : 255);
+#else
+  return (OFFSET-1) + 2*x;
+#endif
+}
+
 void fic_depuncture(uint8_t *obuf, uint8_t *inbuf)
 {
     int i,j;
@@ -40,9 +50,9 @@ void fic_depuncture(uint8_t *obuf, uint8_t *inbuf)
     {
         for (j=0; j<8; j++)
         {
-            *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
-            *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
-            *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
+            *(obuf++) = to_viterbi(*(inbuf++));
+            *(obuf++) = to_viterbi(*(inbuf++));
+            *(obuf++) = to_viterbi(*(inbuf++));
             *(obuf++) = OFFSET;           
         }
     }
@@ -50,22 +60,22 @@ void fic_depuncture(uint8_t *obuf, uint8_t *inbuf)
     {
         for (j=0; j<7; j++)
         {
-            *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
-            *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
-            *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
+            *(obuf++) = to_viterbi(*(inbuf++));
+            *(obuf++) = to_viterbi(*(inbuf++));
+            *(obuf++) = to_viterbi(*(inbuf++));
             *(obuf++) = OFFSET;           
         }
-        *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
-        *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
+        *(obuf++) = to_viterbi(*(inbuf++));
+        *(obuf++) = to_viterbi(*(inbuf++));
         *(obuf++) = OFFSET;           
         *(obuf++) = OFFSET;           
     }
     for (j=0; j<6; j++)
     {
-        *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
-        *(obuf++) = *(inbuf++)*2 + (OFFSET-1);
-        *(obuf++) = OFFSET;           
-        *(obuf++) = OFFSET;           
+        *(obuf++) = to_viterbi(*(inbuf++));
+        *(obuf++) = to_viterbi(*(inbuf++));
+        *(obuf++) = OFFSET;
+        *(obuf++) = OFFSET;
     }
 
    return;
@@ -81,14 +91,14 @@ void uep_depuncture(uint8_t *obuf, uint8_t *inbuf, struct subchannel_info_t *s, 
 	for (indx=0; indx < 4; indx++)
 		for (i=0; i < BLKSIZE * p.l[indx]; i++) {
 			if (pvec[p.pi[indx]][i % 32])
-				*(obuf + k++) = OFFSET - 1 + (*(inbuf + j++) << 1);
+				*(obuf + k++) = to_viterbi(*(inbuf + j++));
 			else
 				*(obuf + k++) = OFFSET;
 		}
 	/* Depuncture remaining 24 bits using rate 8/16 */ 
 	for (i=0; i < 24; i++)
 		if (pvec[7][i % 32])
-			*(obuf + k++) = OFFSET - 1 + (*(inbuf + j++) << 1);
+			*(obuf + k++) = to_viterbi(*(inbuf + j++));
 		else
 			*(obuf + k++) = OFFSET;
 	*len = k;
@@ -108,14 +118,14 @@ void eep_depuncture(uint8_t *obuf, uint8_t *inbuf, struct subchannel_info_t *s, 
 	for (indx=0; indx < 2; indx++)
 		for (i=0; i < BLKSIZE * (p.l[indx].mul * n + p.l[indx].offset); i++) {
 			if (pvec[p.pi[indx]][i % 32])
-				*(obuf + k++) = OFFSET - 1 + (*(inbuf + j++) << 1);
+				*(obuf + k++) = to_viterbi(*(inbuf + j++));
 			else
 				*(obuf + k++) = OFFSET;
 		}
 	/* Depuncture remaining 24 bits using rate 8/16 */ 
 	for (i=0; i < 24; i++)
 		if (pvec[7][i % 32])
-			*(obuf + k++) = OFFSET - 1 + (*(inbuf + j++) << 1);
+			*(obuf + k++) = to_viterbi(*(inbuf + j++));
 		else
 			*(obuf + k++) = OFFSET;
 	*len = k;

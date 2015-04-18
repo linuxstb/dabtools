@@ -6,7 +6,11 @@
 #include "dab.h"
 #include "fic.h"
 #include "depuncture.h"
+#ifdef ENABLE_SPIRAL_VITERBI
+#include "viterbi_spiral.h"
+#else
 #include "viterbi.h"
+#endif
 #include "misc.h"
 #include "dab_tables.h"
 
@@ -153,11 +157,10 @@ static uint8_t null_fib[32] = {
 /* Convert the 3 demapped FIC symbols (3 * 3072 bits) into 4 sets of 3
    32-byte FIBs, check the FIB CRCs, and parse ensemble and sub-channel information. */
 
-void fic_decode(struct demapped_transmission_frame_t *tf)
+void fic_decode(struct dab_state_t *dab, struct demapped_transmission_frame_t *tf)
 {
   uint8_t tmp[3096];
-  int i,j;
-  unsigned int metric;
+  int i,j,k;
 
   tf->fibs.ok_count = 0;
 
@@ -179,8 +182,8 @@ void fic_decode(struct demapped_transmission_frame_t *tf)
     /* depuncture, 2304->3096 */
     fic_depuncture(tmp, tf->fic_symbols_demapped[0]+(i*2304));
 
-    /* viterbi, 3096 -> 768.  Output is converted to bytes */
-    viterbi(&metric, tf->fibs.FIB[fib], tmp, 768, mettab, 0, 0);
+    /* viterbi, 3096 -> 768.  Output is converted to bytes (768/8 = 96) */
+    viterbi(dab->v, tmp, tf->fibs.FIB[fib], 768);
   
     /* descramble (in-place), 768->768 */
     dab_descramble_bytes(tf->fibs.FIB[fib], 96);
@@ -193,7 +196,9 @@ void fic_decode(struct demapped_transmission_frame_t *tf)
         tf->fibs.ok_count++;
         //fprintf(stderr,"CRC OK in fib %d\n",fib);
       } else {
-        //fprintf(stderr,"CRC error in fib %d\n",fib);
+        //fprintf(stderr,"CRC error in fib %d:",fib);
+        //for (k=0;k<32;k++) { fprintf(stderr," %02x",tf->fibs.FIB[fib][k]); }
+        //fprintf(stderr,"\n");
       }
       fib++;
     }

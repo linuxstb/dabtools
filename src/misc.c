@@ -4,7 +4,11 @@
 
 #include "dab.h"
 #include "depuncture.h"
+#ifdef ENABLE_SPIRAL_VITERBI
+#include "viterbi_spiral.h"
+#else
 #include "viterbi.h"
+#endif
 #include "misc.h"
 
 void merge_info(struct ens_info_t* ei, struct tf_info_t *info)
@@ -254,7 +258,7 @@ void create_eti(struct dab_state_t* dab)
       bits = len/N - (K - 1);
       obytes = ((bits / 8) + 7) & 0xfff8; /* Round up to multiple of 64 bits (8 bytes) */
 
-      viterbi(&metric, eti + e, dpbuf, bits, mettab, 0, 0);
+      viterbi(dab->v, dpbuf, eti + e, bits);
 
       dab_descramble_bytes(eti + e, obytes);
 

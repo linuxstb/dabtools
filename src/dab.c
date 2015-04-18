@@ -3,7 +3,11 @@
 #include <string.h>
 
 #include "dab.h"
+#ifdef ENABLE_SPIRAL_VITERBI
+#include "viterbi_spiral.h"
+#else
 #include "viterbi.h"
+#endif
 #include "fic.h"
 #include "misc.h"
 
@@ -20,14 +24,19 @@ void init_dab_state(struct dab_state_t **dab, void* device_state, void (* eti_ca
   (*dab)->ens_info.CIFCount_hi = 0xff;
   (*dab)->ens_info.CIFCount_lo = 0xff;
 
+#ifdef ENABLE_SPIRAL_VITERBI
+  /* TODO: What is the maximum size of a sub-channel? */
+  (*dab)->v = create_viterbi(768*18);
+#else
   init_viterbi();
+#endif
 }
 
 void dab_process_frame(struct dab_state_t *dab)
 {
   int i;
 
-  fic_decode(&dab->tfs[dab->tfidx]);
+  fic_decode(dab, &dab->tfs[dab->tfidx]);
   if (dab->tfs[dab->tfidx].fibs.ok_count > 0) {
     //fprintf(stderr,"Decoded FIBs - ok_count=%d\n",dab->tfs[dab->tfidx].fibs.ok_count);
     fib_decode(&dab->tf_info,&dab->tfs[dab->tfidx].fibs,12);

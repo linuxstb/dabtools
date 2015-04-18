@@ -346,17 +346,18 @@ unsigned int endstate)
   return 0;
 }
 
+static int mettab[2][256];	/* Metric table, [sent sym][rx symbol] */
+
 /* Viterbi decoder */
 int
 viterbi(
-unsigned int *metric,           /* Final path metric (returned value) */
-unsigned char *data,	/* Decoded output data */
+void *p, /* Not used */
 unsigned char *symbols,	/* Raw deinterleaved input symbols */
-unsigned int nbits,	/* Number of output bits */
-int mettab[2][256],	/* Metric table, [sent sym][rx symbol] */
-unsigned int startstate,         /* Encoder starting state */
-unsigned int endstate            /* Encoder ending state */
+unsigned char *data,	/* Decoded output data */
+unsigned int nbits	/* Number of output bits */
 ){
+  unsigned int startstate = 0;         /* Encoder starting state */
+  unsigned int endstate = 0;            /* Encoder ending state */
   int bitcnt = -(K-1);
   long m0,m1;
   int i,j,sym;
@@ -428,7 +429,7 @@ unsigned int endstate            /* Encoder ending state */
       pp++;
     }
     if(++bitcnt == (int)nbits){
-      *metric = nmetric[endstate];
+      //*metric = nmetric[endstate];
       break;
     }
     memcpy(cmetric,nmetric,sizeof(cmetric));
@@ -451,8 +452,6 @@ unsigned int endstate            /* Encoder ending state */
 }
 
 //-----
-int mettab[2][256];
-
 int init_viterbi()
 {
     int amp = 1;

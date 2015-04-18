@@ -74,6 +74,7 @@ struct dab_state_t
   struct demapped_transmission_frame_t tfs[5]; /* We need buffers for 5 tranmission frames - the four previous, plus the new */
   struct tf_info_t tf_info;
   struct ens_info_t ens_info;
+  void* v; /* Viterbi decoder instance */
 
   unsigned char* cifs_msc[16];  /* Each CIF consists of 3072*18 bits */
   unsigned char* cifs_fibs[16];  /* Each CIF consists of 3072*18 bits */

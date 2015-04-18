@@ -44,6 +44,16 @@ ensemble.
 dab2eti on an RTL-SDR dongle requires around 68% CPU on the same CPU
 and ensemble.
 
+There is an experimental Viterbi decoder (which uses x64 SSE
+instructions, so will only compile for x64) which can be enabled by
+uncommenting the "ENABLE_SPIRAL_VITERBI" line in the Makefile.  Please
+ensure you do a "make clean" whenever changing this option.
+
+This Viterbi decoder gives a massive performance boost - reducing CPU
+usage from about 51% to about 7% when used with a Wavefinder, and from
+about 68% to about 28% when used with an RTL-SDR device.
+
+
 Note however that in every 5th transmission frame the Wavefinder skips
 the FIC symbols and doesn't provide them to the host computer.  This
 means that an ETI file created from a Wavefinder will be missing the
@@ -111,7 +121,6 @@ supports a different set of gain values.
 dabtools requires librtlsdr and libfftw3.  The former can be found at
 http://sdr.osmocom.org/trac/wiki/rtl-sdr and the latter should be
 available via your distribution's package manage (e.g. libfftw3-dev).
-
 
 ## Other ETI tools
 
