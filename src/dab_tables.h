@@ -27,7 +27,7 @@ extern const struct eepprof eeptable[];
 extern const struct eepprof eep2a8kbps;
 extern const char pvec[][32];
 
-extern uint16_t freq_deint_tab[1536];
+extern const uint16_t rev_freq_deint_tab[1536];
 
 #endif
 

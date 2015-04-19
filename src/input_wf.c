@@ -23,25 +23,20 @@ static unsigned char chgstr[] = {0x00, 0xf0, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
    format */
 static void wf_demap_symbol(uint8_t* dst, uint8_t* src)
 {
-  int i,j,k;
-  uint8_t tmp[3072];  /* 384*8 */
-  uint8_t* p = tmp;
+  int i,j,k,qq;
+  int q = 0;
 
   /* Convert 16-bit LE words to bits */
   for (i=0;i<192;i++) {
     k = (src[1]<<8) | src[0];
     src += 2;
-    for (j=15;j>=0;j--) {
-      *(p++) = (k >> j) & 1;
+    for (j=15;j>0;j--) {
+      qq = rev_freq_deint_tab[q++];
+
+      /* Frequency deinterleaving and qpsk demapping combined */
+      dst[qq] = (k >> (j--)) & 1;
+      dst[qq+1536] = (k >> j) & 1;
     }
-  }
-
-  /* Frequency deinterleaver and QPSK symbol demapper combined */
-  for(i=0;i<1536;i++) {
-    k = freq_deint_tab[i];
-
-    dst[i] = tmp[(2*k)+0];
-    dst[i+1536] = tmp[(2*k)+1];
   }
 }
 

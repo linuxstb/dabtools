@@ -143,32 +143,24 @@ int sdr_demod(struct demapped_transmission_frame_t *tf, struct sdr_state_t *sdr)
       }
   }
   
-  int k;
-  for (j=1;j<76;j++) {
-    k = 0;
-    for (i=0;i<2048;i++){
-      if ((i>255) && i!=1024 && i < 1793) {
-        sdr->symbols_dc[j*3072+k*2] = (sdr->symbols_d[j*2048+i][0]>0)?0:1;
-        sdr->symbols_dc[j*3072+k*2+1] = (sdr->symbols_d[j*2048+i][1]>0)?1:0;
-        k++;
-      }
-    }
-  }
-  
-  /* frequency deinterleaving and demapping combined */
   uint8_t* dst = tf->fic_symbols_demapped[0];
   tf->has_fic = 1;  /* Always true for SDR input */
 
-  for (i=1;i<76;i++){
-    if (i == 4) { dst = tf->msc_symbols_demapped[0]; }
-    for (j=0;j<1536;j++) {
-      k=freq_deint_tab[j];
-      dst[j] = sdr->symbols_dc[(i*3072)+k*2];
-      dst[1536+j] = sdr->symbols_dc[(i*3072)+k*2+1];
-    } 
+  int k,kk;
+  for (j=1;j<76;j++) {
+    if (j == 4) { dst = tf->msc_symbols_demapped[0]; }
+    k = 0;
+    for (i=0;i<2048;i++){
+      if ((i>255) && i!=1024 && i < 1793) {
+        /* Frequency deinterleaving and QPSK demapping combined */  
+        kk = rev_freq_deint_tab[k++];
+        dst[kk] = (sdr->symbols_d[j*2048+i][0]>0)?0:1;
+        dst[1536+kk] = (sdr->symbols_d[j*2048+i][1]>0)?1:0;
+      }
+    }
     dst += 3072;
   }
-
+  
   return 1;
 }
 
@@ -186,7 +178,6 @@ void sdr_init(struct sdr_state_t *sdr)
 
   // malloc of various buffers
   sdr->symbols_d = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * 2048 * 76);
-  sdr->symbols_dc = malloc(3072 * 76);
 
   /* make sure to disable fault injection by default */
   sdr->p_e_prior_dep = 0.0f;
