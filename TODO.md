@@ -22,7 +22,8 @@ Things to do (in no particular order):
 * Investigate alternative viterbi decoders - profiling shows that
   about 97% of dab2eti's time (when using a wavefinder) is spent in
   the viterbi decoder, so this is the obvious place for optimisation.
-  One option is http://www.spiral.net/software/viterbi.html
+  One option is http://www.spiral.net/software/viterbi.html [This has
+  been implemented for x86 only]
 
 * Implement sub-channel filters in dab2eti, so that dab2eti can save
   CPU time by not decoding data which will later be discarded.  This
@@ -38,3 +39,4 @@ Things to do (in no particular order):
 * Turn the dab2eti functionality into a library to allow full-featured
   DAB applications to be built on top of it.
 
+* Measure SNR and signal level
