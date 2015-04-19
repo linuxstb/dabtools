@@ -8,7 +8,6 @@
 #include <unistd.h>
 
 #include "dab.h"
-#include "fic.h"
 #include "wf_sync.h"
 #include "dab_tables.h"
 #include "../wavefinder-driver/wavefinder.h"
