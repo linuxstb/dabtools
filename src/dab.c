@@ -40,7 +40,6 @@ void dab_process_frame(struct dab_state_t *dab)
   if (dab->tfs[dab->tfidx].fibs.ok_count > 0) {
     //fprintf(stderr,"Decoded FIBs - ok_count=%d\n",dab->tfs[dab->tfidx].fibs.ok_count);
     fib_decode(&dab->tf_info,&dab->tfs[dab->tfidx].fibs,12);
-    merge_info(&dab->ens_info,&dab->tf_info);
     //dump_tf_info(&dab->tf_info);
   }
 
@@ -63,6 +62,7 @@ void dab_process_frame(struct dab_state_t *dab)
   }
 
   if (dab->locked) {
+    merge_info(&dab->ens_info,&dab->tf_info);  /* Only merge the info once we are locked */
     if (dab->ncifs < 16) {
       /* Initial buffer fill */
 	  //fprintf(stderr,"Initial buffer fill - dab->ncifs=%d, dab->tfidx=%d\n",dab->ncifs,dab->tfidx);
