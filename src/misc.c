@@ -201,7 +201,8 @@ int init_eti(uint8_t* eti,struct ens_info_t *info)
   }
   //  EOH()
   //   MNSC
-  i+=2; // TODO
+  eti[i++] = 0xff;
+  eti[i++] = 0xff;
   //   HCRC
   int HCRC = calc_crc(eti+4,i-4,crctab_1021,0xffff);
   HCRC =~ HCRC;
